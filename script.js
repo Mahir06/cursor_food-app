@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.ingredient-card');
+    const draggableImages = document.querySelectorAll('.ingredient-card img');
     const dropZone = document.getElementById('drop-zone');
     const mainBowlImage = document.getElementById('mainBowlImage');
     const undoBtn = document.getElementById('undoBtn');
@@ -19,21 +20,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let actionHistory = []; // to support Undo
 
     // Drag and Drop implementation
-    cards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-            card.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', card.dataset.ingredient);
+    draggableImages.forEach(img => {
+        img.addEventListener('dragstart', (e) => {
+            img.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', img.dataset.ingredient);
             e.dataTransfer.effectAllowed = 'copy';
+            
+            // Set drag image to just the PNG itself without any background
+            e.dataTransfer.setDragImage(img, img.width / 2, img.height / 2);
         });
 
-        card.addEventListener('dragend', () => {
-            card.classList.remove('dragging');
+        img.addEventListener('dragend', () => {
+            img.classList.remove('dragging');
             dropZone.classList.remove('drag-over');
         });
     });
 
     dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Necessary to allow dropping
+        e.preventDefault(); 
         e.dataTransfer.dropEffect = 'copy';
         dropZone.classList.add('drag-over');
     });
@@ -52,10 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Also allow clicking to add for better UX on mobile
+    // Allow clicking on the whole card to add for better UX on mobile
     cards.forEach(card => {
         card.addEventListener('click', () => {
-            const ingredient = card.dataset.ingredient;
+            const img = card.querySelector('img');
+            const ingredient = img.dataset.ingredient;
             if (!activeIngredients.has(ingredient)) {
                 addIngredient(ingredient);
             }
@@ -79,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateBowlImage() {
-        // Sort active ingredients based on the ORDER array to match filenames
         const sortedActive = ORDER.filter(ing => activeIngredients.has(ing));
         
         let filename = 'RICE BOWL';
@@ -88,38 +92,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         filename += '.png';
 
-        // Add a nice fade effect
         mainBowlImage.style.opacity = '0.5';
         setTimeout(() => {
             mainBowlImage.src = `assets/${filename}`;
             mainBowlImage.style.opacity = '1';
         }, 150);
 
-        // Fallback if image doesn't exist (e.g. out of order combinations)
         mainBowlImage.onerror = () => {
             console.warn(`Image not found: ${filename}, falling back to base bowl.`);
-            // You could implement a smarter fallback here to the closest valid image
         };
     }
 
     function updateUI() {
-        // Show/hide undo button
         if (actionHistory.length > 0) {
             undoBtn.style.display = 'block';
         } else {
             undoBtn.style.display = 'none';
         }
 
-        // Visually disable cards that are already added
-        cards.forEach(card => {
-            if (activeIngredients.has(card.dataset.ingredient)) {
-                card.style.opacity = '0.4';
-                card.draggable = false;
-                card.style.cursor = 'default';
+        draggableImages.forEach(img => {
+            if (activeIngredients.has(img.dataset.ingredient)) {
+                img.style.opacity = '0.3';
+                img.draggable = false;
+                img.style.cursor = 'default';
+                img.parentElement.style.cursor = 'default';
             } else {
-                card.style.opacity = '1';
-                card.draggable = true;
-                card.style.cursor = 'grab';
+                img.style.opacity = '1';
+                img.draggable = true;
+                img.style.cursor = 'grab';
+                img.parentElement.style.cursor = 'pointer';
             }
         });
     }
