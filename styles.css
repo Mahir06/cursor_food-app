@@ -210,8 +210,12 @@ body {
     transition: transform 0.2s;
 }
 
+.ingredient-card.active img {
+    cursor: grab;
+}
+
 .ingredient-card.active:active img {
-    transform: scale(0.95);
+    cursor: grabbing;
 }
 
 /* Card Variants */

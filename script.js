@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const cards = document.querySelectorAll('.ingredient-card');
+    const dropZone = document.getElementById('drop-zone');
     const mainBowlImage = document.getElementById('mainBowlImage');
     const undoBtn = document.getElementById('undoBtn');
 
@@ -22,16 +23,91 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUI();
     updateBowlImage();
 
-    // Click to add for sequential UI
+    // Custom Pointer Drag implementation
+    let isDragging = false;
+    let dragClone = null;
+    let currentDraggedIngredient = null;
+    let dropZoneRect = null;
+
     cards.forEach(card => {
-        card.addEventListener('click', () => {
-            const ingredient = card.dataset.ingredient;
+        const img = card.querySelector('img');
+        
+        // Prevent default native dragging if any remains
+        img.addEventListener('dragstart', e => e.preventDefault());
+        
+        img.addEventListener('pointerdown', (e) => {
+            // ONLY allow dragging the sequential active ingredient
+            if (card.dataset.ingredient !== ORDER[currentStepIndex]) return;
             
-            // Only allow clicking the currently active sequential ingredient
-            if (ingredient === ORDER[currentStepIndex]) {
-                addIngredient(ingredient);
-            }
+            e.preventDefault(); 
+            
+            dropZoneRect = dropZone.getBoundingClientRect();
+            
+            isDragging = true;
+            currentDraggedIngredient = card.dataset.ingredient;
+            
+            dragClone = document.createElement('img');
+            dragClone.src = img.src;
+            dragClone.style.position = 'fixed';
+            dragClone.style.pointerEvents = 'none'; 
+            dragClone.style.zIndex = '99999';
+            dragClone.style.opacity = '1';
+            
+            // Enlarge by 15%
+            dragClone.style.width = (img.clientWidth * 1.15) + 'px';
+            dragClone.style.height = 'auto';
+            
+            dragClone.style.transform = 'translate(-50%, -50%)';
+            dragClone.style.left = e.clientX + 'px';
+            dragClone.style.top = e.clientY + 'px';
+            
+            document.body.appendChild(dragClone);
+            
+            // Visually indicate source is being dragged
+            img.style.opacity = '0.4';
         });
+    });
+
+    document.addEventListener('pointermove', (e) => {
+        if (!isDragging || !dragClone) return;
+        
+        dragClone.style.left = e.clientX + 'px';
+        dragClone.style.top = e.clientY + 'px';
+        
+        if (
+            e.clientX >= dropZoneRect.left &&
+            e.clientX <= dropZoneRect.right &&
+            e.clientY >= dropZoneRect.top &&
+            e.clientY <= dropZoneRect.bottom
+        ) {
+            dropZone.classList.add('drag-over');
+        } else {
+            dropZone.classList.remove('drag-over');
+        }
+    });
+
+    document.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        
+        if (dropZone.classList.contains('drag-over')) {
+            if (currentDraggedIngredient && !activeIngredients.has(currentDraggedIngredient)) {
+                addIngredient(currentDraggedIngredient);
+            }
+        }
+        
+        if (dragClone) {
+            document.body.removeChild(dragClone);
+            dragClone = null;
+        }
+        
+        // Reset source image opacity
+        cards.forEach(card => {
+            card.querySelector('img').style.opacity = '1';
+        });
+        
+        dropZone.classList.remove('drag-over');
+        isDragging = false;
+        currentDraggedIngredient = null;
     });
 
     undoBtn.addEventListener('click', () => {
