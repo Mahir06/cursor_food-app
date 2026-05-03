@@ -163,6 +163,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (ingredient === ORDER[currentStepIndex]) {
                 // The current required step
                 card.classList.add('active');
+                
+                // Auto-scroll the horizontal dial to center this card
+                card.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
             } else {
                 // Future step
                 card.classList.add('disabled');
