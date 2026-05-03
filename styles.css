@@ -29,11 +29,6 @@ body {
     width: min(420px, calc(100vw - 32px));
     height: auto;
     filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
-    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    cursor: pointer;
-}
-
-.device--photo:hover {
     transform: translateY(-10px);
 }
 
