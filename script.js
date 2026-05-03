@@ -25,6 +25,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.target.classList.add('dragging');
                 e.dataTransfer.setData('text/plain', card.dataset.ingredient);
                 e.dataTransfer.effectAllowed = 'copy';
+
+                // Create a custom enlarged drag image
+                const dragImg = new Image();
+                dragImg.src = e.target.src;
+                dragImg.style.position = 'absolute';
+                dragImg.style.top = '-9999px';
+                // Enlarge by 20%
+                dragImg.style.width = (e.target.clientWidth * 1.2) + 'px';
+                dragImg.style.opacity = '1';
+                document.body.appendChild(dragImg);
+
+                // Set the drag image, centering it on the cursor
+                e.dataTransfer.setDragImage(dragImg, dragImg.clientWidth / 2, dragImg.clientHeight / 2);
+
+                // Clean up the temporary image
+                setTimeout(() => {
+                    document.body.removeChild(dragImg);
+                }, 0);
+
             } else {
                 e.preventDefault(); // Prevent dragging if it's not the image
             }
