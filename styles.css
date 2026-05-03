@@ -156,7 +156,7 @@ body {
 .ingredients-carousel {
     display: flex;
     overflow-x: auto;
-    gap: 20px; /* Slightly larger gap to accommodate scaling */
+    gap: 8px; /* Reduced gap to enforce overlap when active card scales */
     align-items: center; 
     padding-bottom: 24px;
     padding-top: 24px; 
@@ -198,9 +198,10 @@ body {
 
 .ingredient-card.active {
     border-color: var(--accent-orange);
-    background: #FFF7ED;
+    background: var(--card-bg); /* Same background as inactive */
     /* Scale instead of changing width/height for butter-smooth reflow-free animation */
     transform: scale(1.2);
+    box-shadow: 0 8px 24px rgba(250, 90, 0, 0.15); /* Subtle orange glow */
     z-index: 10;
 }
 
