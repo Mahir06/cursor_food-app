@@ -1,3 +1,20 @@
+:root {
+    --bg-color: #fafafa;
+    --sheet-bg: #f3f4f6;
+    --card-bg: #ffffff;
+    --text-primary: #222222;
+    --text-secondary: #717171;
+    --accent-yellow: #f5a623;
+    --accent-red: #ff385c;
+    --border-radius-lg: 24px;
+    --border-radius-md: 16px;
+    --border-radius-sm: 12px;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+    --transition-fast: 0.2s ease;
+    --transition-spring: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,38 +22,328 @@
 }
 
 body {
-    background-color: #fafafa;
-    font-family: "Fira Sans", system-ui, -apple-system, sans-serif;
-    color: #3A3A3C;
+    background-color: var(--bg-color);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
     min-height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow-x: hidden;
 }
 
-.page {
-    width: 1173px;
-    height: 958px;
-    padding: 24px 16px 48px;
+.app-container {
+    width: 390px;
+    height: 844px; /* iPhone 12/13/14 Pro size */
+    background: #ffffff;
+    border-radius: 40px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main Dish Area */
+.main-dish-area {
+    height: 45%;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Optional: background to see the container if needed, but the prompt says #fafafa background for the page/body */
     position: relative;
+    background: radial-gradient(circle, #ffffff 0%, #f9f9f9 100%);
+    z-index: 1;
 }
 
-.device--photo {
-    width: min(420px, calc(100vw - 32px));
+.main-bowl {
+    width: 85%;
     height: auto;
-    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));
-    transform: translateY(-10px);
+    object-fit: contain;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+    transition: transform var(--transition-spring);
 }
 
-/* Responsive adjustments for the container if the screen is smaller than 1173px */
-@media (max-width: 1173px) {
-    .page {
-        width: 100%;
-        height: auto;
-        min-height: 100vh;
-    }
+/* Bottom Sheet */
+.bottom-sheet {
+    height: 55%;
+    background-color: var(--sheet-bg);
+    border-radius: 32px 32px 0 0;
+    padding: 24px;
+    box-shadow: 0 -10px 20px rgba(0,0,0,0.02);
+    overflow-y: auto;
+    z-index: 2;
+}
+
+.bottom-sheet::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for cleaner look */
+}
+
+/* Cards General */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.card:active {
+    transform: scale(0.97);
+}
+
+/* Ingredients Grid Layout */
+.ingredients-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* Large Card */
+.card-large {
+    grid-column: 1 / 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    position: relative;
+    min-height: 220px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.heart-icon {
+    font-size: 20px;
+    color: var(--accent-red);
+}
+
+.large-img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    margin: 8px 0;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.text-group h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.text-group p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+/* Buttons */
+.circle-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.yellow-btn {
+    background-color: var(--accent-yellow);
+    color: white;
+}
+
+.light-btn {
+    background-color: #fee2e2;
+    color: var(--accent-red);
+}
+
+/* Small Cards Grid */
+.small-cards-wrapper {
+    grid-column: 2 / 3;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.card-small {
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px solid transparent;
+}
+
+.card-small.active {
+    border-color: #34d399; /* Soft green */
+    background-color: #f0fdf4;
+}
+
+.card-small p {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 8px;
+}
+
+.img-placeholder {
+    width: 48px;
+    height: 48px;
+    font-size: 28px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f9fafb;
+    border-radius: 12px;
+    transition: transform var(--transition-spring);
+}
+
+.card-small:hover .img-placeholder {
+    transform: translateY(-4px);
+}
+
+/* Row Cards */
+.card-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.card-row.active {
+    border: 2px solid #34d399;
+}
+
+.row-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.row-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.img-placeholder.round {
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    font-size: 32px;
+}
+
+.row-text h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.row-text p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.row-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* Counter */
+.counter {
+    display: flex;
+    align-items: center;
+    background: #f3f4f6;
+    border-radius: 20px;
+    padding: 4px;
+}
+
+.counter-btn {
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: white;
+    border-radius: 50%;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.counter .count {
+    min-width: 28px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* Chosen Status */
+.chosen-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chosen-status span {
+    font-size: 14px;
+    color: #059669;
+    font-weight: 500;
+}
+
+.check-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #059669;
+    color: #059669;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Animation Layer and Flying Items */
+#animation-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.flying-item {
+    position: absolute;
+    font-size: 32px;
+    /* transition will be handled by JS for precise control */
+    pointer-events: none;
+    z-index: 10;
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2));
+}
+
+@keyframes bounceBowl {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.bounce {
+    animation: bounceBowl 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
