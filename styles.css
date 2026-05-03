@@ -164,13 +164,37 @@ body {
 .ingredient-card {
     background: var(--card-bg);
     border-radius: 16px;
+    border: 2px solid transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    cursor: pointer; /* we handle pointer drag on img */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.ingredient-card.active {
+    border-color: var(--accent-orange);
+    background: #FFF7ED;
+}
+
+.ingredient-card.active p {
+    color: var(--accent-orange);
+    font-weight: 600;
+}
+
+.ingredient-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.ingredient-card.done {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
 }
 
 .ingredient-card p {
@@ -182,9 +206,12 @@ body {
 
 .ingredient-card img {
     object-fit: contain;
-    cursor: grab; 
     clip-path: inset(2px); 
-    /* removed transition/active scale to let JS handle it completely */
+    transition: transform 0.2s;
+}
+
+.ingredient-card.active:active img {
+    transform: scale(0.95);
 }
 
 /* Card Variants */
