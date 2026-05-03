@@ -110,7 +110,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 5px 0 15px;
-    height: 195px; /* Balanced height */
+    flex: 1; /* Takes up all remaining vertical space */
     transition: transform 0.2s ease;
     z-index: 10; /* Ensures Undo button overlaps the container below */
 }
@@ -120,8 +120,8 @@ body {
 }
 
 .main-bowl-img {
-    width: 76%; /* Smaller bowl */
-    max-height: 170px;
+    width: 85%; /* Larger bowl */
+    max-height: 250px;
     height: auto;
     object-fit: contain;
     clip-path: inset(2px);
@@ -146,11 +146,9 @@ body {
 
 /* Ingredients Container */
 .ingredients-container {
-    flex: 1;
     background: var(--container-bg);
     border-radius: 36px 36px 0 0; 
-    padding: 20px 16px 12px;
-    overflow: hidden; /* Force fit without scroll */
+    padding: 28px 16px 8px; /* Tighter bottom padding */
     z-index: 5;
 }
 
