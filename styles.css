@@ -148,17 +148,20 @@ body {
 .ingredients-container {
     background: var(--container-bg);
     border-radius: 36px 36px 0 0; 
-    padding: 28px 16px 8px; /* Tighter bottom padding */
+    padding: 28px 0px 8px; /* Removed left/right padding so carousel bleeds to edge */
     z-index: 5;
 }
 
 .ingredients-carousel {
     display: flex;
     overflow-x: auto;
-    gap: 16px;
-    align-items: center; /* Centers cards vertically so active one pops out */
-    padding-bottom: 8px;
-    padding-top: 8px; /* Room for active card to pop up */
+    gap: 20px; /* Slightly larger gap to accommodate scaling */
+    align-items: center; 
+    padding-bottom: 24px;
+    padding-top: 24px; 
+    /* Ensures the first and last items can scroll to the exact center */
+    padding-left: calc(50% - 60px);
+    padding-right: calc(50% - 60px);
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
     /* Hide scrollbar */
@@ -179,20 +182,25 @@ body {
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    flex: 0 0 110px; 
-    height: 110px; /* Base height */
+    
+    /* Base layout dimensions (prevent jank by keeping these static) */
+    flex: 0 0 120px; 
+    height: 120px; 
     scroll-snap-align: center;
     padding: 12px;
+    
+    /* Hardware accelerated transition */
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s, background 0.2s;
+    transform-origin: center center;
 }
 
 .ingredient-card.active {
     border-color: var(--accent-orange);
     background: #FFF7ED;
-    height: 140px; /* Pops out taller */
-    flex: 0 0 120px; /* Slightly wider */
+    /* Scale instead of changing width/height for butter-smooth reflow-free animation */
+    transform: scale(1.2);
+    z-index: 10;
 }
 
 .ingredient-card.active p {
@@ -220,16 +228,16 @@ body {
 }
 
 .ingredient-card img {
-    height: 55px; /* Larger base image */
+    height: 60px; /* Larger base image */
     width: auto;
     max-width: 100%;
     object-fit: contain;
     clip-path: inset(2px); 
-    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .ingredient-card.active img {
-    height: 75px; /* Pops out larger */
+    transform: scale(1.15); /* Magnifies the image inside the scaled card */
     cursor: grab;
 }
 
