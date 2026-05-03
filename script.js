@@ -15,6 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
         "BIRYANI SAUCE"
     ];
 
+    // Preload all sequential bowl images to completely eliminate rendering delay
+    const preloadedImages = [];
+    let preloadSequence = [];
+    ORDER.forEach(ingredient => {
+        preloadSequence.push(ingredient);
+        const filename = 'RICE BOWL, ' + preloadSequence.join(', ') + '.png';
+        const img = new Image();
+        img.src = `assets/${filename}`;
+        preloadedImages.push(img);
+    });
+
     let activeIngredients = new Set();
     let actionHistory = []; // to support Undo
     let currentStepIndex = 0; // Tracks the sequential step
