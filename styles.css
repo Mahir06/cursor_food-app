@@ -169,7 +169,6 @@ body {
     /* Hide scrollbar */
     -ms-overflow-style: none;
     scrollbar-width: none;
-    overflow: visible; /* Ensure shadows aren't clipped by the carousel itself */
 }
 
 .ingredients-carousel::-webkit-scrollbar {
@@ -198,13 +197,6 @@ body {
     transform-origin: center center;
 }
 
-.ingredient-card:hover:not(.active) {
-    transform: scale(1.1); /* Enlarge on hover */
-    z-index: 2;
-    background: #ffffff;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-}
-
 .ingredient-card.active {
     border-color: #E5E7EB; /* Subtle gray border */
     background: var(--card-bg); /* Same background as inactive */
@@ -212,10 +204,6 @@ body {
     transform: scale(1.2);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08); /* Subtle gray shadow */
     z-index: 10;
-}
-
-.ingredient-card.active:hover {
-    transform: scale(1.25); /* Slightly larger when hovering active card */
 }
 
 .ingredient-card.active p {
@@ -254,6 +242,15 @@ body {
 .ingredient-card.active img {
     transform: scale(1.15); /* Magnifies the image inside the scaled card */
     cursor: grab;
+}
+
+/* Hover effects for images specifically */
+.ingredient-card:hover img {
+    transform: scale(1.1);
+}
+
+.ingredient-card.active:hover img {
+    transform: scale(1.3); /* Extra scale for active item on hover */
 }
 
 .ingredient-card.active:active img {
