@@ -149,9 +149,9 @@ body {
 .ingredients-container {
     background: var(--container-bg);
     border-radius: 36px 36px 0 0; 
-    padding: 12px 0px 0px; 
-    position: relative; 
-    z-index: 20; /* High z-index to let shadow bleed over bottom bar */
+    padding: 12px 0px 8px; /* Reduced top padding so active card overlaps the top edge */
+    position: relative; /* Essential for z-index to work and prevent shadow clipping */
+    z-index: 5;
 }
 
 .ingredients-carousel {
@@ -159,7 +159,7 @@ body {
     overflow-x: auto;
     gap: 8px; /* Reduced gap to enforce overlap when active card scales */
     align-items: center; 
-    padding-bottom: 24px; /* Space for shadow to exist */
+    padding-bottom: 48px; /* Further increased padding to prevent shadow clipping */
     padding-top: 24px; 
     /* Ensures the first and last items can scroll to the exact center */
     padding-left: calc(50% - 60px);
@@ -264,11 +264,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px 24px; /* No top padding */
+    padding: 12px 20px 20px;
     background: var(--container-bg);
-    position: relative;
-    z-index: 10; /* Lower than ingredients-container */
-    margin-top: -16px; /* Pulls it up into the carousel's shadow area */
 }
 
 .quantity-selector {
