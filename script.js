@@ -1,159 +1,143 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const mainBowl = document.getElementById('mainBowl');
-    const animationLayer = document.getElementById('animation-layer');
-    const ingredientCards = document.querySelectorAll('.ingredient-card');
-    const pattyCounter = document.getElementById('patty-counter');
-    const countSpan = pattyCounter.querySelector('.count');
-    const minusBtn = pattyCounter.querySelector('.minus');
-    const plusBtn = pattyCounter.querySelector('.plus');
-    const sauceCard = document.querySelector('.sauce-card');
+    const cards = document.querySelectorAll('.ingredient-card');
+    const dropZone = document.getElementById('drop-zone');
+    const mainBowlImage = document.getElementById('mainBowlImage');
+    const undoBtn = document.getElementById('undoBtn');
+    
+    // The exact order of ingredients in the provided filenames
+    const ORDER = [
+        'ONION', 
+        'JALAPENO', 
+        'OLIVE', 
+        'CAPSICUM', 
+        'ALOO PATTY', 
+        'CHIPOTLE SAUCE', 
+        'BIRYANI SAUCE'
+    ];
 
-    // Helper function to create flying animation
-    function flyElement(startX, startY, endX, endY, content, isAdding) {
-        const flyingEl = document.createElement('div');
-        flyingEl.className = 'flying-item';
-        flyingEl.innerHTML = content;
-        
-        // Initial state
-        flyingEl.style.left = `${startX}px`;
-        flyingEl.style.top = `${startY}px`;
-        flyingEl.style.transform = `translate(-50%, -50%) scale(${isAdding ? 1 : 0.5})`;
-        flyingEl.style.opacity = isAdding ? '1' : '0';
-        flyingEl.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    let activeIngredients = new Set();
+    let actionHistory = []; // to support Undo
 
-        animationLayer.appendChild(flyingEl);
-
-        // Trigger animation
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-                flyingEl.style.left = `${endX}px`;
-                flyingEl.style.top = `${endY}px`;
-                flyingEl.style.transform = `translate(-50%, -50%) scale(${isAdding ? 0.5 : 1})`;
-                flyingEl.style.opacity = isAdding ? '0' : '1';
-            });
+    // Drag and Drop implementation
+    cards.forEach(card => {
+        card.addEventListener('dragstart', (e) => {
+            card.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', card.dataset.ingredient);
+            e.dataTransfer.effectAllowed = 'copy';
         });
 
-        // Cleanup and trigger bowl bounce
-        setTimeout(() => {
-            flyingEl.remove();
-            if (isAdding) {
-                bounceBowl();
-            }
-        }, 600);
-    }
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            dropZone.classList.remove('drag-over');
+        });
+    });
 
-    function bounceBowl() {
-        mainBowl.classList.remove('bounce');
-        // Force reflow
-        void mainBowl.offsetWidth;
-        mainBowl.classList.add('bounce');
-    }
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault(); // Necessary to allow dropping
+        e.dataTransfer.dropEffect = 'copy';
+        dropZone.classList.add('drag-over');
+    });
 
-    // Ingredient Cards Click
-    ingredientCards.forEach(card => {
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        
+        const ingredient = e.dataTransfer.getData('text/plain');
+        if (ingredient && !activeIngredients.has(ingredient)) {
+            addIngredient(ingredient);
+        }
+    });
+
+    // Also allow clicking to add for better UX on mobile
+    cards.forEach(card => {
         card.addEventListener('click', () => {
-            const isActive = card.classList.contains('active');
-            const emoji = card.dataset.emoji;
-            
-            // Get coordinates
-            const cardRect = card.getBoundingClientRect();
-            const bowlRect = mainBowl.getBoundingClientRect();
-            
-            // Calculate centers relative to viewport (since app-container might have offset, but we are inside it)
-            // It's safer to use client rects if animation layer covers the whole screen, but our animation layer is inside main-dish-area.
-            // Let's make animation layer fixed to screen for easier coordinates, or compute relative to app-container.
-            // Actually, animation-layer is absolute inside main-dish-area.
-            // Better to make animation-layer fixed to viewport in JS or calculate carefully.
-            
-            // Let's change animation layer to fixed in JS for easier rect matching
-            animationLayer.style.position = 'fixed';
-            animationLayer.style.zIndex = '1000';
-
-            const cardCenterX = cardRect.left + cardRect.width / 2;
-            const cardCenterY = cardRect.top + cardRect.height / 2;
-            
-            const bowlCenterX = bowlRect.left + bowlRect.width / 2;
-            const bowlCenterY = bowlRect.top + bowlRect.height / 2;
-
-            if (isActive) {
-                // Remove: Fly from bowl to card
-                card.classList.remove('active');
-                flyElement(bowlCenterX, bowlCenterY, cardCenterX, cardCenterY, emoji, false);
-            } else {
-                // Add: Fly from card to bowl
-                card.classList.add('active');
-                flyElement(cardCenterX, cardCenterY, bowlCenterX, bowlCenterY, emoji, true);
+            const ingredient = card.dataset.ingredient;
+            if (!activeIngredients.has(ingredient)) {
+                addIngredient(ingredient);
             }
         });
     });
 
-    // Aloo Patty Counter
-    let pattyCount = 1;
-
-    plusBtn.addEventListener('click', () => {
-        pattyCount++;
-        updatePattyCount();
-        
-        const btnRect = plusBtn.getBoundingClientRect();
-        const bowlRect = mainBowl.getBoundingClientRect();
-        
-        flyElement(
-            btnRect.left + btnRect.width/2, 
-            btnRect.top + btnRect.height/2, 
-            bowlRect.left + bowlRect.width/2, 
-            bowlRect.top + bowlRect.height/2, 
-            '🧆', // Fallback emoji for patty if image is hard
-            true
-        );
+    undoBtn.addEventListener('click', () => {
+        if (actionHistory.length > 0) {
+            const lastIngredient = actionHistory.pop();
+            activeIngredients.delete(lastIngredient);
+            updateBowlImage();
+            updateUI();
+        }
     });
+
+    function addIngredient(ingredient) {
+        activeIngredients.add(ingredient);
+        actionHistory.push(ingredient);
+        updateBowlImage();
+        updateUI();
+    }
+
+    function updateBowlImage() {
+        // Sort active ingredients based on the ORDER array to match filenames
+        const sortedActive = ORDER.filter(ing => activeIngredients.has(ing));
+        
+        let filename = 'RICE BOWL';
+        if (sortedActive.length > 0) {
+            filename += ', ' + sortedActive.join(', ');
+        }
+        filename += '.png';
+
+        // Add a nice fade effect
+        mainBowlImage.style.opacity = '0.5';
+        setTimeout(() => {
+            mainBowlImage.src = `assets/${filename}`;
+            mainBowlImage.style.opacity = '1';
+        }, 150);
+
+        // Fallback if image doesn't exist (e.g. out of order combinations)
+        mainBowlImage.onerror = () => {
+            console.warn(`Image not found: ${filename}, falling back to base bowl.`);
+            // You could implement a smarter fallback here to the closest valid image
+        };
+    }
+
+    function updateUI() {
+        // Show/hide undo button
+        if (actionHistory.length > 0) {
+            undoBtn.style.display = 'block';
+        } else {
+            undoBtn.style.display = 'none';
+        }
+
+        // Visually disable cards that are already added
+        cards.forEach(card => {
+            if (activeIngredients.has(card.dataset.ingredient)) {
+                card.style.opacity = '0.4';
+                card.draggable = false;
+                card.style.cursor = 'default';
+            } else {
+                card.style.opacity = '1';
+                card.draggable = true;
+                card.style.cursor = 'grab';
+            }
+        });
+    }
+
+    // Quantity selector logic
+    const qtySpan = document.querySelector('.quantity-selector span');
+    const [minusBtn, plusBtn] = document.querySelectorAll('.qty-btn');
+    let qty = 1;
 
     minusBtn.addEventListener('click', () => {
-        if (pattyCount > 0) {
-            pattyCount--;
-            updatePattyCount();
-            
-            const btnRect = minusBtn.getBoundingClientRect();
-            const bowlRect = mainBowl.getBoundingClientRect();
-            
-            flyElement(
-                bowlRect.left + bowlRect.width/2, 
-                bowlRect.top + bowlRect.height/2, 
-                btnRect.left + btnRect.width/2, 
-                btnRect.top + btnRect.height/2, 
-                '🧆',
-                false
-            );
+        if (qty > 1) {
+            qty--;
+            qtySpan.textContent = qty;
         }
     });
 
-    function updatePattyCount() {
-        countSpan.textContent = pattyCount;
-    }
-
-    // Sauce Card Toggle
-    sauceCard.addEventListener('click', () => {
-        const isActive = sauceCard.classList.contains('active');
-        const statusDiv = sauceCard.querySelector('.chosen-status');
-        const textP = sauceCard.querySelector('.row-text p');
-        
-        const cardRect = sauceCard.getBoundingClientRect();
-        const bowlRect = mainBowl.getBoundingClientRect();
-        
-        const startX = cardRect.left + cardRect.width / 2;
-        const startY = cardRect.top + cardRect.height / 2;
-        const endX = bowlRect.left + bowlRect.width / 2;
-        const endY = bowlRect.top + bowlRect.height / 2;
-
-        if (isActive) {
-            sauceCard.classList.remove('active');
-            statusDiv.style.opacity = '0';
-            textP.textContent = '0 options chosen';
-            flyElement(endX, endY, startX, startY, '🥣', false);
-        } else {
-            sauceCard.classList.add('active');
-            statusDiv.style.opacity = '1';
-            textP.textContent = '1 option chosen';
-            flyElement(startX, startY, endX, endY, '🥣', true);
-        }
+    plusBtn.addEventListener('click', () => {
+        qty++;
+        qtySpan.textContent = qty;
     });
 });
