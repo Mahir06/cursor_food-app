@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     customCursor.classList.add('custom-cursor');
     document.body.appendChild(customCursor);
 
-    // Track mouse position globally
-    document.addEventListener('mousemove', (e) => {
+    // Track pointer position globally
+    document.addEventListener('pointermove', (e) => {
         customCursor.style.left = e.clientX + 'px';
         customCursor.style.top = e.clientY + 'px';
     });

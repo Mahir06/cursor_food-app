@@ -149,7 +149,7 @@ body {
 .ingredients-container {
     background: var(--container-bg);
     border-radius: 36px 36px 0 0; 
-    padding: 28px 0px 8px; /* Removed left/right padding so carousel bleeds to edge */
+    padding: 12px 0px 8px; /* Reduced top padding so active card overlaps the top edge */
     z-index: 5;
 }
 
@@ -302,8 +302,8 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 32px;
-    height: 32px;
+    width: 20px; /* Reduced base size */
+    height: 20px;
     background-color: rgba(100, 100, 100, 0.15); 
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 50%;
@@ -313,13 +313,13 @@ body {
     transition: width 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
                 height 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), 
                 background-color 0.2s ease;
-    backdrop-filter: blur(6px); 
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(4px); 
+    -webkit-backdrop-filter: blur(4px);
 }
 
 .custom-cursor.hover {
-    width: 48px;
-    height: 48px;
+    width: 36px; /* Reduced hover size */
+    height: 36px;
     background-color: rgba(100, 100, 100, 0.25);
 }
 
