@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeIngredients = new Set();
     let actionHistory = []; // to support Undo
 
+    let customGhost = null;
+
     // Drag and Drop implementation
     cards.forEach(card => {
         card.addEventListener('dragstart', (e) => {
@@ -26,30 +28,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.dataTransfer.setData('text/plain', card.dataset.ingredient);
                 e.dataTransfer.effectAllowed = 'copy';
 
-                // Create a custom enlarged drag image
-                const dragImg = new Image();
-                dragImg.src = e.target.src;
-                dragImg.style.position = 'absolute';
-                dragImg.style.top = '-9999px';
-                // Enlarge by 20%
-                dragImg.style.width = (e.target.clientWidth * 1.2) + 'px';
-                dragImg.style.opacity = '1';
-                document.body.appendChild(dragImg);
+                // Hide native drag image using a blank canvas
+                const blankCanvas = document.createElement('canvas');
+                blankCanvas.width = 1;
+                blankCanvas.height = 1;
+                e.dataTransfer.setDragImage(blankCanvas, 0, 0);
 
-                // Set the drag image, centering it on the cursor
-                e.dataTransfer.setDragImage(dragImg, dragImg.clientWidth / 2, dragImg.clientHeight / 2);
-
-                // Clean up the temporary image
-                setTimeout(() => {
-                    document.body.removeChild(dragImg);
-                }, 0);
-
+                // Create custom ghost element
+                customGhost = document.createElement('img');
+                customGhost.src = e.target.src;
+                customGhost.style.position = 'fixed';
+                customGhost.style.pointerEvents = 'none';
+                customGhost.style.zIndex = '9999';
+                customGhost.style.opacity = '1';
+                
+                // Enlarge by 15%
+                customGhost.style.width = (e.target.clientWidth * 1.15) + 'px';
+                customGhost.style.height = 'auto';
+                
+                // Center on cursor
+                customGhost.style.transform = 'translate(-50%, -50%)'; 
+                customGhost.style.left = e.clientX + 'px';
+                customGhost.style.top = e.clientY + 'px';
+                
+                document.body.appendChild(customGhost);
             } else {
                 e.preventDefault(); // Prevent dragging if it's not the image
             }
         });
 
+        card.addEventListener('drag', (e) => {
+            if (customGhost && (e.clientX !== 0 || e.clientY !== 0)) {
+                customGhost.style.left = e.clientX + 'px';
+                customGhost.style.top = e.clientY + 'px';
+            }
+        });
+
         card.addEventListener('dragend', (e) => {
+            if (customGhost) {
+                document.body.removeChild(customGhost);
+                customGhost = null;
+            }
             if (e.target.tagName === 'IMG') {
                 e.target.classList.remove('dragging');
             }

@@ -115,7 +115,7 @@ body {
     z-index: 10; /* Ensures Undo button overlaps the container below */
 }
 
-.bowl-area.drag-over {
+.bowl-area.drag-over .main-bowl-img {
     transform: scale(1.05);
 }
 
@@ -130,8 +130,8 @@ body {
 
 .undo-btn {
     position: absolute;
-    bottom: -16px; /* Perfectly overlapping the border of the sheet below */
-    right: 24px;
+    bottom: 8px; /* Floating slightly above the white sheet boundary */
+    right: 20px;
     background: #ffffff;
     border: none;
     padding: 10px 20px;
