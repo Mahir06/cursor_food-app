@@ -4,6 +4,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainBowlImage = document.getElementById('mainBowlImage');
     const undoBtn = document.getElementById('undoBtn');
 
+    // Create and inject custom cursor
+    const customCursor = document.createElement('div');
+    customCursor.classList.add('custom-cursor');
+    document.body.appendChild(customCursor);
+
+    // Track mouse position globally
+    document.addEventListener('mousemove', (e) => {
+        customCursor.style.left = e.clientX + 'px';
+        customCursor.style.top = e.clientY + 'px';
+    });
+
+    // Add hover effects for interactive elements
+    const interactiveSelectors = 'button, .ingredient-card, .icon-btn, .qty-btn';
+    const interactiveElements = document.querySelectorAll(interactiveSelectors);
+    interactiveElements.forEach(el => {
+        el.addEventListener('mouseenter', () => customCursor.classList.add('hover'));
+        el.addEventListener('mouseleave', () => customCursor.classList.remove('hover'));
+    });
+
     // Expected order of ingredients to generate the correct filename
     const ORDER = [
         "ONION",
