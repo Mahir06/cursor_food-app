@@ -122,21 +122,22 @@ body {
     width: 80%;
     height: auto;
     object-fit: contain;
+    clip-path: inset(2px);
     transition: all 0.3s ease;
 }
 
 .undo-btn {
     position: absolute;
-    bottom: 0px;
-    right: 20px;
+    bottom: -10px; /* Aligned with bottom of bowl visually */
+    right: 16px;
     background: #ffffff;
     border: none;
-    padding: 8px 16px;
+    padding: 8px 18px;
     border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     color: #4B5563;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
     cursor: pointer;
     display: none; 
 }
@@ -176,11 +177,11 @@ body {
     object-fit: contain;
     cursor: grab; /* Make image clearly draggable */
     transition: transform 0.2s;
+    clip-path: inset(2px); /* Crop 2 pixels from all sides */
 }
 
 .ingredient-card img:active {
     cursor: grabbing;
-    transform: scale(0.92);
 }
 
 /* Card Variants */

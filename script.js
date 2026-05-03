@@ -94,17 +94,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         filename += '.png';
 
-        // Add a nice fade effect
-        mainBowlImage.style.opacity = '0.5';
-        setTimeout(() => {
-            mainBowlImage.src = `assets/${filename}`;
-            mainBowlImage.style.opacity = '1';
-        }, 150);
+        // Update instantly
+        mainBowlImage.src = `assets/${filename}`;
 
         // Fallback if image doesn't exist (e.g. out of order combinations)
         mainBowlImage.onerror = () => {
             console.warn(`Image not found: ${filename}, falling back to base bowl.`);
-            // You could implement a smarter fallback here to the closest valid image
         };
     }
 
