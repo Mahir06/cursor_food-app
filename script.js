@@ -3,97 +3,105 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const mainBowlImage = document.getElementById('mainBowlImage');
     const undoBtn = document.getElementById('undoBtn');
-    
-    // The exact order of ingredients in the provided filenames
+
+    // Expected order of ingredients to generate the correct filename
     const ORDER = [
-        'ONION', 
-        'JALAPENO', 
-        'OLIVE', 
-        'CAPSICUM', 
-        'ALOO PATTY', 
-        'CHIPOTLE SAUCE', 
-        'BIRYANI SAUCE'
+        "ONION",
+        "JALAPENO",
+        "OLIVE",
+        "CAPSICUM",
+        "ALOO PATTY",
+        "CHIPOTLE SAUCE",
+        "BIRYANI SAUCE"
     ];
 
     let activeIngredients = new Set();
     let actionHistory = []; // to support Undo
 
-    let customGhost = null;
+    // Custom Pointer Drag implementation
+    let isDragging = false;
+    let dragClone = null;
+    let currentDraggedIngredient = null;
+    let dropZoneRect = null;
 
-    // Drag and Drop implementation
     cards.forEach(card => {
-        card.addEventListener('dragstart', (e) => {
-            if (e.target.tagName === 'IMG') {
-                e.target.classList.add('dragging');
-                e.dataTransfer.setData('text/plain', card.dataset.ingredient);
-                e.dataTransfer.effectAllowed = 'copy';
-
-                // Hide native drag image using a blank canvas
-                const blankCanvas = document.createElement('canvas');
-                blankCanvas.width = 1;
-                blankCanvas.height = 1;
-                e.dataTransfer.setDragImage(blankCanvas, 0, 0);
-
-                // Create custom ghost element
-                customGhost = document.createElement('img');
-                customGhost.src = e.target.src;
-                customGhost.style.position = 'fixed';
-                customGhost.style.pointerEvents = 'none';
-                customGhost.style.zIndex = '9999';
-                customGhost.style.opacity = '1';
-                
-                // Enlarge by 15%
-                customGhost.style.width = (e.target.clientWidth * 1.15) + 'px';
-                customGhost.style.height = 'auto';
-                
-                // Center on cursor
-                customGhost.style.transform = 'translate(-50%, -50%)'; 
-                customGhost.style.left = e.clientX + 'px';
-                customGhost.style.top = e.clientY + 'px';
-                
-                document.body.appendChild(customGhost);
-            } else {
-                e.preventDefault(); // Prevent dragging if it's not the image
-            }
-        });
-
-        card.addEventListener('drag', (e) => {
-            if (customGhost && (e.clientX !== 0 || e.clientY !== 0)) {
-                customGhost.style.left = e.clientX + 'px';
-                customGhost.style.top = e.clientY + 'px';
-            }
-        });
-
-        card.addEventListener('dragend', (e) => {
-            if (customGhost) {
-                document.body.removeChild(customGhost);
-                customGhost = null;
-            }
-            if (e.target.tagName === 'IMG') {
-                e.target.classList.remove('dragging');
-            }
-            dropZone.classList.remove('drag-over');
-        });
-    });
-
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault(); // Necessary to allow dropping
-        e.dataTransfer.dropEffect = 'copy';
-        dropZone.classList.add('drag-over');
-    });
-
-    dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('drag-over');
-    });
-
-    dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('drag-over');
+        const img = card.querySelector('img');
         
-        const ingredient = e.dataTransfer.getData('text/plain');
-        if (ingredient && !activeIngredients.has(ingredient)) {
-            addIngredient(ingredient);
+        // Prevent default native dragging if any remains
+        img.addEventListener('dragstart', e => e.preventDefault());
+        
+        img.addEventListener('pointerdown', (e) => {
+            if (activeIngredients.has(card.dataset.ingredient)) return;
+            
+            e.preventDefault(); 
+            
+            dropZoneRect = dropZone.getBoundingClientRect();
+            
+            isDragging = true;
+            currentDraggedIngredient = card.dataset.ingredient;
+            
+            dragClone = document.createElement('img');
+            dragClone.src = img.src;
+            dragClone.style.position = 'fixed';
+            dragClone.style.pointerEvents = 'none'; 
+            dragClone.style.zIndex = '99999';
+            dragClone.style.opacity = '1';
+            
+            // Enlarge by 15%
+            dragClone.style.width = (img.clientWidth * 1.15) + 'px';
+            dragClone.style.height = 'auto';
+            
+            dragClone.style.transform = 'translate(-50%, -50%)';
+            dragClone.style.left = e.clientX + 'px';
+            dragClone.style.top = e.clientY + 'px';
+            
+            document.body.appendChild(dragClone);
+            
+            // Visually indicate source is being dragged
+            img.style.opacity = '0.4';
+        });
+    });
+
+    document.addEventListener('pointermove', (e) => {
+        if (!isDragging || !dragClone) return;
+        
+        dragClone.style.left = e.clientX + 'px';
+        dragClone.style.top = e.clientY + 'px';
+        
+        if (
+            e.clientX >= dropZoneRect.left &&
+            e.clientX <= dropZoneRect.right &&
+            e.clientY >= dropZoneRect.top &&
+            e.clientY <= dropZoneRect.bottom
+        ) {
+            dropZone.classList.add('drag-over');
+        } else {
+            dropZone.classList.remove('drag-over');
         }
+    });
+
+    document.addEventListener('pointerup', (e) => {
+        if (!isDragging) return;
+        
+        if (dropZone.classList.contains('drag-over')) {
+            if (currentDraggedIngredient && !activeIngredients.has(currentDraggedIngredient)) {
+                addIngredient(currentDraggedIngredient);
+            }
+        }
+        
+        if (dragClone) {
+            document.body.removeChild(dragClone);
+            dragClone = null;
+        }
+        
+        // Reset source image opacity
+        cards.forEach(card => {
+            card.querySelector('img').style.opacity = '1';
+        });
+        
+        dropZone.classList.remove('drag-over');
+        isDragging = false;
+        currentDraggedIngredient = null;
     });
 
     // Also allow clicking to add for better UX on mobile
@@ -123,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateBowlImage() {
-        // Sort active ingredients based on the ORDER array to match filenames
         const sortedActive = ORDER.filter(ing => activeIngredients.has(ing));
         
         let filename = 'RICE BOWL';
@@ -132,32 +139,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         filename += '.png';
 
-        // Update instantly
         mainBowlImage.src = `assets/${filename}`;
 
-        // Fallback if image doesn't exist (e.g. out of order combinations)
         mainBowlImage.onerror = () => {
             console.warn(`Image not found: ${filename}, falling back to base bowl.`);
         };
     }
 
     function updateUI() {
-        // Show/hide undo button
         if (actionHistory.length > 0) {
             undoBtn.style.display = 'block';
         } else {
             undoBtn.style.display = 'none';
         }
 
-        // Visually disable cards that are already added
         cards.forEach(card => {
             if (activeIngredients.has(card.dataset.ingredient)) {
                 card.style.opacity = '0.4';
-                card.draggable = false;
                 card.style.cursor = 'default';
             } else {
                 card.style.opacity = '1';
-                card.draggable = true;
                 card.style.cursor = 'grab';
             }
         });
